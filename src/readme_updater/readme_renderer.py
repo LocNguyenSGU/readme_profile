@@ -34,14 +34,10 @@ def _slugify_repo_name(repo_full_name: str) -> str:
 
 
 def render_readme_block(groups: list[RepositoryContributions], *, days: int) -> str:
-    total_prs = sum(len(group.contributions) for group in groups)
-    total_repos = len(groups)
-    top_group = max(groups, key=lambda item: item.upstream_stars, default=None)
-
     lines = [
         "## Recent Open Source Contributions",
         "",
-        f"_Merged in the last {days} days_",
+        "### SVG Cards By Repository",
         "",
     ]
 
@@ -51,47 +47,11 @@ def render_readme_block(groups: list[RepositoryContributions], *, days: int) -> 
 
     lines.extend(
         [
-            "### Contribution Snapshot",
-            "",
-            '<p align="center">',
-            '  <img src="./assets/contributions.svg" alt="Contribution summary card" width="88%"/>',
-            "</p>",
-            "",
-            "| Metric | Value |",
-            "|---|---|",
-            f"| Total merged PRs | {total_prs} |",
-            f"| Repositories | {total_repos} |",
-            (
-                f"| Top repository | [{top_group.repo_full_name}]({top_group.repo_url}) "
-                f"({format_stars(top_group.upstream_stars)} stars) |"
-                if top_group
-                else "| Top repository | N/A |"
-            ),
-            "",
-            "### Contribution Table",
-            "",
-            "| Repository | Stars | PR | Merged |",
-            "|---|---:|---|---|",
-        ]
-    )
-
-    for group in groups:
-        for contribution in group.contributions:
-            merged_date = contribution.merged_at.date().isoformat()
-            lines.append(
-                "| "
-                f"[{group.repo_full_name}]({group.repo_url}) | "
-                f"{format_stars(group.upstream_stars)} | "
-                f"[{_escape_link_text(contribution.pr_title)}]({contribution.pr_url}) | "
-                f"{merged_date} |"
-            )
-
-    lines.extend(
-        [
-            "",
-            "### SVG Cards By Repository",
-            "",
-            '<p align="center">',
+            "<table>",
+            "  <tr>",
+            "    <th>Repository</th>",
+            "    <th>Contribution Card</th>",
+            "  </tr>",
         ]
     )
 
@@ -99,15 +59,21 @@ def render_readme_block(groups: list[RepositoryContributions], *, days: int) -> 
         file_name = f"contributions-{_slugify_repo_name(group.repo_full_name)}.svg"
         lines.extend(
             [
+                "  <tr>",
                 (
-                    f'  <img src="./assets/{file_name}" '
-                    f'alt="{_escape_link_text(group.repo_full_name)} contribution card" width="88%"/>'
+                    f'    <td><a href="{group.repo_url}">{_escape_link_text(group.repo_full_name)}</a></td>'
                 ),
-                "  <br/>",
+                '    <td align="center">',
+                (
+                    f'      <img src="./assets/{file_name}" '
+                    f'alt="{_escape_link_text(group.repo_full_name)} contribution card" width="420" />'
+                ),
+                "    </td>",
+                "  </tr>",
             ]
         )
 
-    lines.append("</p>")
+    lines.append("</table>")
 
     return "\n".join(lines).rstrip()
 
