@@ -82,6 +82,14 @@ def _format_stars_label(count: int) -> str:
     return label
 
 
+def _truncate_label(text: str, *, max_chars: int) -> str:
+    if len(text) <= max_chars:
+        return text
+    if max_chars <= 1:
+        return text[:max_chars]
+    return f"{text[: max_chars - 1]}…"
+
+
 def pick_repo_accent_color(repo_full_name: str) -> str:
     if not repo_full_name:
         return ACCENT_PALETTE[0]
@@ -114,29 +122,31 @@ def render_svg_card(metrics: SummaryMetrics) -> str:
     title = escape("Merged Upstream Contributions")
     accent = pick_repo_accent_color(metrics.top_repo_name)
     primary_value = escape(str(metrics.total_merged_prs))
+    top_repo_name = _truncate_label(metrics.top_repo_name, max_chars=34)
     repo_count_label = escape(
         f"{metrics.total_repos} upstream repo{'s' if metrics.total_repos != 1 else ''}"
     )
-    top_target_label = escape(f"Top target: {metrics.top_repo_name}")
+    top_target_label = escape(f"Top target: {top_repo_name}")
     stars_label = escape(f"{metrics.top_repo_stars_label} stars")
     window_label = escape(metrics.window_label)
 
     return f"""<svg width="720" height="220" viewBox="0 0 720 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Merged Upstream Contributions summary card">
-  <rect x="0.5" y="0.5" width="719" height="219" rx="18" fill="#FFFFFF" stroke="{accent}"/>
-  <circle cx="670" cy="40" r="62" fill="{accent}" fill-opacity="0.10"/>
-  <circle cx="70" cy="168" r="74" fill="{accent}" fill-opacity="0.07"/>
+    <rect x="0.5" y="0.5" width="719" height="219" rx="18" fill="#FFFFFF" stroke="{accent}"/>
+    <circle cx="680" cy="36" r="54" fill="{accent}" fill-opacity="0.08"/>
+    <circle cx="48" cy="184" r="56" fill="{accent}" fill-opacity="0.07"/>
+    <line x1="246" y1="34" x2="246" y2="188" stroke="{accent}" stroke-opacity="0.22"/>
     <svg id="decorative-emblem" viewBox="0 0 80 80" width="64" height="64" x="22" y="22" aria-hidden="true">
         <path fill="{accent}" d="{EMBLEM_PATH}"/>
     </svg>
 
-    <text x="112" y="46" fill="{accent}" font-family="Arial, sans-serif" font-size="12" letter-spacing="0.05em" textLength="300" lengthAdjust="spacingAndGlyphs">{title.upper()}</text>
-    <text x="28" y="166" fill="{accent}" font-family="Arial, sans-serif" font-size="48" font-weight="700">{primary_value}</text>
-    <text x="30" y="188" fill="#4B5563" font-family="Arial, sans-serif" font-size="14">merged PRs</text>
+        <text x="108" y="46" fill="{accent}" font-family="Arial, sans-serif" font-size="12" letter-spacing="0.05em" textLength="300" lengthAdjust="spacingAndGlyphs">{title.upper()}</text>
+        <text x="34" y="150" fill="{accent}" font-family="Arial, sans-serif" font-size="58" font-weight="700">{primary_value}</text>
+        <text x="36" y="178" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">merged PRs</text>
 
-    <text x="360" y="86" fill="#1F2937" font-family="Arial, sans-serif" font-size="22" font-weight="700">{repo_count_label}</text>
-    <text x="360" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="18">{top_target_label}</text>
-    <text x="360" y="146" fill="{accent}" font-family="Arial, sans-serif" font-size="16">{stars_label}</text>
-    <text x="360" y="172" fill="#6B7280" font-family="Arial, sans-serif" font-size="14">{window_label}</text>
+        <text x="274" y="84" fill="#1F2937" font-family="Arial, sans-serif" font-size="40" font-weight="700">{repo_count_label}</text>
+        <text x="274" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="16" textLength="420" lengthAdjust="spacingAndGlyphs">{top_target_label}</text>
+        <text x="274" y="150" fill="{accent}" font-family="Arial, sans-serif" font-size="18">{stars_label}</text>
+        <text x="274" y="178" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">{window_label}</text>
 </svg>
 """
 
@@ -149,27 +159,29 @@ def render_repo_svg_cards(groups: list[RepositoryContributions], *, days: int) -
         merged_count = len(group.contributions)
         merged_label = "PR" if merged_count == 1 else "PRs"
         repo_name = escape(group.repo_full_name)
+        top_repo_name = _truncate_label(group.repo_full_name, max_chars=34)
         stars_label = escape(_format_stars_label(group.upstream_stars))
         window_label = escape(f"Last {days} days")
         repo_count_label = "1 upstream repo"
-        top_target_label = escape(f"Top target: {group.repo_full_name}")
+        top_target_label = escape(f"Top target: {top_repo_name}")
 
         svg = f"""<svg width="720" height="220" viewBox="0 0 720 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{repo_name} contribution card">
-  <rect x="0.5" y="0.5" width="719" height="219" rx="18" fill="#FFFFFF" stroke="{accent}"/>
-  <circle cx="668" cy="34" r="56" fill="{accent}" fill-opacity="0.11"/>
-  <circle cx="64" cy="172" r="82" fill="{accent}" fill-opacity="0.08"/>
+    <rect x="0.5" y="0.5" width="719" height="219" rx="18" fill="#FFFFFF" stroke="{accent}"/>
+    <circle cx="680" cy="36" r="54" fill="{accent}" fill-opacity="0.08"/>
+    <circle cx="48" cy="184" r="56" fill="{accent}" fill-opacity="0.07"/>
+    <line x1="246" y1="34" x2="246" y2="188" stroke="{accent}" stroke-opacity="0.22"/>
     <svg id="decorative-emblem" viewBox="0 0 80 80" width="64" height="64" x="22" y="22" aria-hidden="true">
         <path fill="{accent}" d="{EMBLEM_PATH}"/>
     </svg>
 
-    <text x="112" y="46" fill="{accent}" font-family="Arial, sans-serif" font-size="12" letter-spacing="0.05em" textLength="300" lengthAdjust="spacingAndGlyphs">MERGED UPSTREAM CONTRIBUTIONS</text>
-    <text x="28" y="166" fill="{accent}" font-family="Arial, sans-serif" font-size="48" font-weight="700">{merged_count}</text>
-    <text x="30" y="188" fill="#4B5563" font-family="Arial, sans-serif" font-size="14">merged {merged_label}</text>
+        <text x="108" y="46" fill="{accent}" font-family="Arial, sans-serif" font-size="12" letter-spacing="0.05em" textLength="300" lengthAdjust="spacingAndGlyphs">MERGED UPSTREAM CONTRIBUTIONS</text>
+        <text x="34" y="150" fill="{accent}" font-family="Arial, sans-serif" font-size="58" font-weight="700">{merged_count}</text>
+        <text x="36" y="178" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">merged {merged_label}</text>
 
-    <text x="360" y="86" fill="#1F2937" font-family="Arial, sans-serif" font-size="22" font-weight="700">{repo_count_label}</text>
-    <text x="360" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="18">{top_target_label}</text>
-    <text x="360" y="146" fill="{accent}" font-family="Arial, sans-serif" font-size="16">{stars_label} stars</text>
-    <text x="360" y="172" fill="#6B7280" font-family="Arial, sans-serif" font-size="14">{window_label}</text>
+        <text x="274" y="84" fill="#1F2937" font-family="Arial, sans-serif" font-size="40" font-weight="700">{repo_count_label}</text>
+        <text x="274" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="16" textLength="420" lengthAdjust="spacingAndGlyphs">{top_target_label}</text>
+        <text x="274" y="150" fill="{accent}" font-family="Arial, sans-serif" font-size="18">{stars_label} stars</text>
+        <text x="274" y="178" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">{window_label}</text>
 </svg>
 """
         cards.append(
