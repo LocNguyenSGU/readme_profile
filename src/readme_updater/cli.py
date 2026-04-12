@@ -37,17 +37,25 @@ def _slugify_repo_name(repo_full_name: str) -> str:
 def _write_svg_outputs(svg_output: Path, result: dict[str, object]) -> None:
     svg_output.parent.mkdir(parents=True, exist_ok=True)
 
+    # Always keep a stable summary card path for README embeds.
+    summary_svg = result.get("summary_svg")
+    if isinstance(summary_svg, str) and summary_svg.strip():
+        svg_output.write_text(summary_svg)
+
     raw_cards = result.get("svg_cards")
     if not isinstance(raw_cards, list) or not raw_cards:
-        svg_output.write_text(str(result.get("svg", "")))
+        if not (isinstance(summary_svg, str) and summary_svg.strip()):
+            svg_output.write_text(str(result.get("svg", "")))
         return
 
     if len(raw_cards) == 1:
         first_card = raw_cards[0]
         if isinstance(first_card, dict):
-            svg_output.write_text(str(first_card.get("svg", result.get("svg", ""))))
+            if not (isinstance(summary_svg, str) and summary_svg.strip()):
+                svg_output.write_text(str(first_card.get("svg", result.get("svg", ""))))
             return
-        svg_output.write_text(str(result.get("svg", "")))
+        if not (isinstance(summary_svg, str) and summary_svg.strip()):
+            svg_output.write_text(str(result.get("svg", "")))
         return
 
     for card in raw_cards:

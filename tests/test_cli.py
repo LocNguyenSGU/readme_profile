@@ -64,6 +64,7 @@ def test_main_update_writes_svg_and_readme(
         lambda runtime_config: {
             "readme_block": "## Recent Open Source Contributions",
             "svg": "<svg>fallback</svg>",
+            "summary_svg": "<svg>summary</svg>",
             "svg_cards": [
                 {
                     "repo_full_name": "owner/repo",
@@ -78,7 +79,7 @@ def test_main_update_writes_svg_and_readme(
 
     assert exit_code == 0
     assert "## Recent Open Source Contributions" in readme_path.read_text()
-    assert svg_path.read_text() == "<svg>repo-card</svg>"
+    assert svg_path.read_text() == "<svg>summary</svg>"
 
 
 def test_main_update_writes_one_svg_per_repo_when_multiple_groups(
@@ -108,6 +109,7 @@ def test_main_update_writes_one_svg_per_repo_when_multiple_groups(
         lambda runtime_config: {
             "readme_block": "## Recent Open Source Contributions",
             "svg": "<svg>fallback</svg>",
+            "summary_svg": "<svg>summary</svg>",
             "svg_cards": [
                 {
                     "repo_full_name": "HKUDS/DeepTutor",
@@ -125,9 +127,9 @@ def test_main_update_writes_one_svg_per_repo_when_multiple_groups(
     exit_code = main()
 
     assert exit_code == 0
+    assert svg_path.read_text() == "<svg>summary</svg>"
     assert (tmp_path / "assets" / "contributions-hkuds-deeptutor.svg").read_text() == "<svg>card1</svg>"
     assert (tmp_path / "assets" / "contributions-chatgptprojects-clear-code.svg").read_text() == "<svg>card2</svg>"
-    assert not svg_path.exists()
 
 
 def test_main_update_dry_run_does_not_modify_files(

@@ -75,11 +75,14 @@ def test_format_stars_abbreviates_thousands() -> None:
 def test_render_readme_block_includes_repo_pr_and_window_label() -> None:
     block = render_readme_block([make_group()], days=30)
     assert "Merged in the last 30 days" in block
-    assert "[owner/repo](https://github.com/owner/repo) · 12.4k stars · 1 merged PR" in block
+    assert "<img src=\"./assets/contributions.svg\"" in block
+    assert "| Repository | Stars | PR | Merged |" in block
+    assert "| [owner/repo](https://github.com/owner/repo) | 12.4k |" in block
     assert (
-        "[Improve parser fallback](https://github.com/owner/repo/pull/101) · merged 2026-04-10"
+        "[Improve parser fallback](https://github.com/owner/repo/pull/101) | 2026-04-10"
         in block
     )
+    assert "./assets/contributions-owner-repo.svg" in block
 
 
 def test_render_readme_block_escapes_markdown_breaking_title_characters() -> None:
@@ -90,6 +93,13 @@ def test_render_readme_block_escapes_markdown_breaking_title_characters() -> Non
 def test_render_readme_block_includes_empty_state_when_no_groups() -> None:
     block = render_readme_block([], days=30)
     assert "No merged upstream contributions in the selected time window." in block
+
+
+def test_render_readme_block_includes_metrics_table() -> None:
+    block = render_readme_block([make_group()], days=30)
+    assert "| Metric | Value |" in block
+    assert "| Total merged PRs | 1 |" in block
+    assert "| Repositories | 1 |" in block
 
 
 def test_replace_marker_block_rewrites_only_marker_content() -> None:

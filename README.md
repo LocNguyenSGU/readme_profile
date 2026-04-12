@@ -29,9 +29,31 @@ python -m readme_updater.cli update --days 3 --dry-run
 
 _Merged in the last 30 days_
 
-### [HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor) · 17.1k stars · 1 merged PR
-- [docs: clarify github copilot provider login semantics](https://github.com/HKUDS/DeepTutor/pull/262) · merged 2026-04-08
+### Contribution Snapshot
 
-### [chatgptprojects/clear-code](https://github.com/chatgptprojects/clear-code) · 2.0k stars · 1 merged PR
-- [fix: correct README repository metrics links](https://github.com/chatgptprojects/clear-code/pull/13) · merged 2026-04-02
+<p align="center">
+  <img src="./assets/contributions.svg" alt="Contribution summary card" width="88%"/>
+</p>
+
+| Metric | Value |
+|---|---|
+| Total merged PRs | 2 |
+| Repositories | 2 |
+| Top repository | [HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor) (17.1k stars) |
+
+### Contribution Table
+
+| Repository | Stars | PR | Merged |
+|---|---:|---|---|
+| [HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor) | 17.1k | [docs: clarify github copilot provider login semantics](https://github.com/HKUDS/DeepTutor/pull/262) | 2026-04-08 |
+| [chatgptprojects/clear-code](https://github.com/chatgptprojects/clear-code) | 2.0k | [fix: correct README repository metrics links](https://github.com/chatgptprojects/clear-code/pull/13) | 2026-04-02 |
+
+### SVG Cards By Repository
+
+<p align="center">
+  <img src="./assets/contributions-hkuds-deeptutor.svg" alt="HKUDS/DeepTutor contribution card" width="88%"/>
+  <br/>
+  <img src="./assets/contributions-chatgptprojects-clear-code.svg" alt="chatgptprojects/clear-code contribution card" width="88%"/>
+  <br/>
+</p>
 <!-- contributions:end -->
