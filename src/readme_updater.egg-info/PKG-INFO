@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: readme-updater
+Version: 0.1.0
+Summary: CLI to update GitHub README contribution sections from merged upstream PRs
+Requires-Python: >=3.12
+Requires-Dist: httpx<1.0.0,>=0.27.0
+Provides-Extra: dev
+Requires-Dist: pytest<9.0.0,>=8.0.0; extra == "dev"
+Requires-Dist: pytest-mock<4.0.0,>=3.14.0; extra == "dev"
+Requires-Dist: respx<1.0.0,>=0.21.0; extra == "dev"

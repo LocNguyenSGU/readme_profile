@@ -6,6 +6,7 @@ from readme_updater.models import ContributionRecord, RepositoryContributions
 from readme_updater.readme_renderer import (
     ReadmeMarkerError,
     format_stars,
+    render_full_readme,
     render_readme_block,
     replace_marker_block,
 )
@@ -72,13 +73,16 @@ def test_format_stars_abbreviates_thousands() -> None:
     assert format_stars(12400) == "12.4k"
 
 
-def test_render_readme_block_includes_repo_pr_and_window_label() -> None:
+def test_render_readme_block_includes_repo_and_latest_merge() -> None:
     block = render_readme_block([make_group()], days=30)
     assert "### SVG Cards By Repository" in block
     assert "<table>" in block
     assert '<th>Repository</th>' in block
+    assert '<th>Latest Merge</th>' in block
     assert '<th>Contribution Card</th>' in block
+    assert '<th>Merged PRs</th>' not in block
     assert '<td><a href="https://github.com/owner/repo">owner/repo</a></td>' in block
+    assert "<td>2026-04-10</td>" in block
     assert "./assets/contributions-owner-repo.svg" in block
 
 
@@ -92,12 +96,12 @@ def test_render_readme_block_includes_empty_state_when_no_groups() -> None:
     assert "No merged upstream contributions in the selected time window." in block
 
 
-def test_replace_marker_block_appends_new_content_without_replacing_existing() -> None:
+def test_replace_marker_block_replaces_existing_content() -> None:
     original = "before\n<!-- contributions:start -->\nold\n<!-- contributions:end -->\nafter\n"
     updated = replace_marker_block(original, "new block")
     assert (
         updated
-        == "before\n<!-- contributions:start -->\nold\n\nnew block\n<!-- contributions:end -->\nafter\n"
+        == "before\n<!-- contributions:start -->\nnew block\n<!-- contributions:end -->\nafter\n"
     )
 
 
@@ -116,3 +120,39 @@ def test_replace_marker_block_skips_exact_duplicate_block() -> None:
 def test_replace_marker_block_requires_both_markers() -> None:
     with pytest.raises(ReadmeMarkerError):
         replace_marker_block("missing markers", "new")
+
+
+def test_render_full_readme_appends_marker_block_when_missing() -> None:
+    original = "# Profile\n"
+
+    updated = render_full_readme(original, [make_group()], days=30)
+
+    assert updated.endswith("<!-- contributions:end -->\n")
+    assert "## Recent Open Source Contributions" in updated
+    assert '<td><a href="https://github.com/owner/repo">owner/repo</a></td>' in updated
+
+
+def test_render_full_readme_appends_only_repos_not_already_present() -> None:
+    original = """# Profile
+
+## Recent Open Source Contributions
+
+<table>
+  <tr>
+    <th>Repository</th>
+    <th>Latest Merge</th>
+    <th>Contribution Card</th>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/owner/repo">owner/repo</a></td>
+    <td>2026-04-10</td>
+    <td align="center">
+      <img src="./assets/contributions-owner-repo.svg" alt="owner/repo contribution card" width="420" />
+    </td>
+  </tr>
+</table>
+"""
+
+    updated = render_full_readme(original, [make_group()], days=30)
+
+    assert updated == original

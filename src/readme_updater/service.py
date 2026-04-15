@@ -98,6 +98,7 @@ def run_update(runtime_config: object) -> dict[str, object]:
     summary_svg = render_svg_card(build_summary_metrics(groups, days=runtime_config.days))
     repo_svg_cards = render_repo_svg_cards(groups, days=runtime_config.days)
     return {
+        "groups": groups,
         "readme_block": readme_block,
         "svg": repo_svg_cards[0]["svg"],
         "summary_svg": summary_svg,

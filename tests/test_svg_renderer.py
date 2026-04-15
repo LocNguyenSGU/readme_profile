@@ -85,6 +85,8 @@ def test_render_repo_svg_cards_returns_one_card_per_repo_with_distinct_colors() 
     assert cards[0]["repo_full_name"] == "HKUDS/DeepTutor"
     assert cards[1]["repo_full_name"] == "chatgptprojects/clear-code"
     assert cards[0]["color"] != cards[1]["color"]
-    assert "Top target: HKUDS/DeepTutor" in cards[0]["svg"]
-    assert "Top target: chatgptprojects/clear-code" in cards[1]["svg"]
+    assert "HKUDS/DeepTutor" in cards[0]["svg"]
+    assert "chatgptprojects/clear-code" in cards[1]["svg"]
+    assert "Latest merge: 2026-04-08" in cards[0]["svg"]
+    assert "merged PR" in cards[0]["svg"]
     assert "Repository Of The Day" not in cards[0]["svg"]

@@ -10,6 +10,8 @@ from readme_updater.config import load_config
 from readme_updater.github_api import GitHubApiError
 from readme_updater.readme_renderer import ReadmeMarkerError
 from readme_updater.readme_renderer import replace_marker_block
+from readme_updater.readme_renderer import render_full_readme
+from readme_updater.readme_renderer import wrap_marker_block
 from readme_updater.service import run_update
 
 
@@ -67,6 +69,23 @@ def _write_svg_outputs(svg_output: Path, result: dict[str, object]) -> None:
         output_path.write_text(str(card.get("svg", "")))
 
 
+def _update_readme_text(current_readme: str, result: dict[str, object], *, days: int) -> str:
+    groups = result.get("groups")
+    if isinstance(groups, list):
+        return render_full_readme(current_readme, groups, days=days)
+
+    block_text = str(result["readme_block"]).strip()
+    if "<!-- contributions:start -->" in current_readme or "<!-- contributions:end -->" in current_readme:
+        return replace_marker_block(current_readme, block_text)
+
+    wrapped_block = wrap_marker_block(block_text)
+    if wrapped_block in current_readme:
+        return current_readme
+
+    separator = "\n" if current_readme.endswith("\n") else "\n\n"
+    return f"{current_readme}{separator}{wrapped_block}\n"
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -87,7 +106,11 @@ def main() -> int:
                 return 0
 
             current_readme = config.readme_path.read_text()
-            updated_readme = replace_marker_block(current_readme, str(result["readme_block"]))
+            updated_readme = _update_readme_text(
+                current_readme,
+                result,
+                days=config.days,
+            )
             config.readme_path.write_text(updated_readme)
             _write_svg_outputs(config.svg_output, result)
             return 0

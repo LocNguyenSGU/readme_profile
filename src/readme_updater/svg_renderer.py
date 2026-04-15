@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from html import escape
 
 from readme_updater.models import RepositoryContributions
@@ -90,6 +91,12 @@ def _truncate_label(text: str, *, max_chars: int) -> str:
     return f"{text[: max_chars - 1]}…"
 
 
+def _format_merge_date(value: datetime | None) -> str:
+    if value is None:
+        return "Unknown"
+    return value.date().isoformat()
+
+
 def pick_repo_accent_color(repo_full_name: str) -> str:
     if not repo_full_name:
         return ACCENT_PALETTE[0]
@@ -159,11 +166,17 @@ def render_repo_svg_cards(groups: list[RepositoryContributions], *, days: int) -
         merged_count = len(group.contributions)
         merged_label = "PR" if merged_count == 1 else "PRs"
         repo_name = escape(group.repo_full_name)
-        top_repo_name = _truncate_label(group.repo_full_name, max_chars=34)
+        display_repo_name = escape(_truncate_label(group.repo_full_name, max_chars=32))
+        merged_dates = [
+            contribution.merged_at
+            for contribution in group.contributions
+            if contribution.merged_at is not None
+        ]
+        latest_merge_label = escape(
+            f"Latest merge: {_format_merge_date(max(merged_dates, default=None))}"
+        )
         stars_label = escape(_format_stars_label(group.upstream_stars))
         window_label = escape(f"Last {days} days")
-        repo_count_label = "1 upstream repo"
-        top_target_label = escape(f"Top target: {top_repo_name}")
 
         svg = f"""<svg width="720" height="220" viewBox="0 0 720 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{repo_name} contribution card">
     <rect x="0.5" y="0.5" width="719" height="219" rx="18" fill="#FFFFFF" stroke="{accent}"/>
@@ -178,8 +191,8 @@ def render_repo_svg_cards(groups: list[RepositoryContributions], *, days: int) -
         <text x="34" y="150" fill="{accent}" font-family="Arial, sans-serif" font-size="58" font-weight="700">{merged_count}</text>
         <text x="36" y="178" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">merged {merged_label}</text>
 
-        <text x="274" y="84" fill="#1F2937" font-family="Arial, sans-serif" font-size="40" font-weight="700">{repo_count_label}</text>
-        <text x="274" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="16" textLength="420" lengthAdjust="spacingAndGlyphs">{top_target_label}</text>
+        <text x="274" y="84" fill="#1F2937" font-family="Arial, sans-serif" font-size="28" font-weight="700">{display_repo_name}</text>
+        <text x="274" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="16" textLength="420" lengthAdjust="spacingAndGlyphs">{latest_merge_label}</text>
         <text x="274" y="150" fill="{accent}" font-family="Arial, sans-serif" font-size="18">{stars_label} stars</text>
         <text x="274" y="178" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">{window_label}</text>
 </svg>

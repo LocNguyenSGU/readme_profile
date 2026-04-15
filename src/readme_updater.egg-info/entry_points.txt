@@ -1,0 +1,2 @@
+[console_scripts]
+readme-updater = readme_updater.cli:main

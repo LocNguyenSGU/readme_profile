@@ -11,8 +11,8 @@
         <text x="34" y="150" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="58" font-weight="700">1</text>
         <text x="36" y="178" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">merged PR</text>
 
-        <text x="274" y="84" fill="#1F2937" font-family="Arial, sans-serif" font-size="40" font-weight="700">1 upstream repo</text>
-        <text x="274" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="16" textLength="420" lengthAdjust="spacingAndGlyphs">Top target: HKUDS/DeepTutor</text>
-        <text x="274" y="150" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="18">17.1k stars</text>
-        <text x="274" y="178" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">Last 30 days</text>
+        <text x="274" y="84" fill="#1F2937" font-family="Arial, sans-serif" font-size="28" font-weight="700">HKUDS/DeepTutor</text>
+        <text x="274" y="118" fill="#374151" font-family="Arial, sans-serif" font-size="16" textLength="420" lengthAdjust="spacingAndGlyphs">Latest merge: 2026-04-08</text>
+        <text x="274" y="150" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="18">18.3k stars</text>
+        <text x="274" y="178" fill="#6B7280" font-family="Arial, sans-serif" font-size="16">Last 90 days</text>
 </svg>

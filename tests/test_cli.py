@@ -82,6 +82,65 @@ def test_main_update_writes_svg_and_readme(
     assert svg_path.read_text() == "<svg>summary</svg>"
 
 
+def test_main_update_appends_block_when_readme_has_no_markers(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    readme_path = tmp_path / "README.md"
+    readme_path.write_text("# Profile\n")
+    svg_path = tmp_path / "assets" / "contributions.svg"
+
+    config = RuntimeConfig(
+        github_token="token",
+        github_user="nguyenhuuloc",
+        readme_path=readme_path,
+        svg_output=svg_path,
+        state_file=tmp_path / ".state.json",
+        days=30,
+        dry_run=False,
+        verbose=False,
+    )
+
+    monkeypatch.setattr("readme_updater.cli.load_config", lambda **_: config)
+    monkeypatch.setattr(
+        "readme_updater.cli.run_update",
+        lambda runtime_config: {
+            "readme_block": (
+                "## Recent Open Source Contributions\n\n"
+                "<table>\n"
+                "  <tr>\n"
+                "    <th>Repository</th>\n"
+                "    <th>Merged PRs</th>\n"
+                "    <th>Latest Merge</th>\n"
+                "    <th>Contribution Card</th>\n"
+                "  </tr>\n"
+                "  <tr>\n"
+                '    <td><a href="https://github.com/owner/repo">owner/repo</a></td>\n'
+                "    <td>2</td>\n"
+                "    <td>2026-04-11</td>\n"
+                '    <td align="center"><img src="./assets/contributions-owner-repo.svg" alt="owner/repo contribution card" width="420" /></td>\n'
+                "  </tr>\n"
+                "</table>"
+            ),
+            "svg": "<svg>fallback</svg>",
+            "summary_svg": "<svg>summary</svg>",
+            "svg_cards": [
+                {
+                    "repo_full_name": "owner/repo",
+                    "svg": "<svg>repo-card</svg>",
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr("sys.argv", ["readme-updater", "update"])
+
+    exit_code = main()
+
+    assert exit_code == 0
+    assert "<!-- contributions:start -->" in readme_path.read_text()
+    assert readme_path.read_text().count("owner/repo") == 3
+
+
 def test_main_update_writes_one_svg_per_repo_when_multiple_groups(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -329,7 +388,7 @@ def test_describe_ineligibility_returns_expected_reason() -> None:
     assert reason == "head_repo_is_not_fork"
 
 
-def test_main_returns_non_zero_on_missing_readme_markers(
+def test_main_appends_when_readme_markers_are_missing(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -354,4 +413,6 @@ def test_main_returns_non_zero_on_missing_readme_markers(
     )
     monkeypatch.setattr("sys.argv", ["readme-updater", "update"])
 
-    assert main() == 1
+    assert main() == 0
+    assert "<!-- contributions:start -->" in readme_path.read_text()
+    assert "content" in readme_path.read_text()

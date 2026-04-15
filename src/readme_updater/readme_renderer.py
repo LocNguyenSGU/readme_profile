@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import re
+from datetime import datetime
+
 from readme_updater.models import RepositoryContributions
 
 START_MARKER = "<!-- contributions:start -->"
 END_MARKER = "<!-- contributions:end -->"
+REPO_LINK_PATTERN = re.compile(
+    r'<a href="https://github\.com/[^"/]+/[^"/]+">([^<]+)</a>'
+)
 
 
 class ReadmeMarkerError(ValueError):
@@ -33,6 +39,29 @@ def _slugify_repo_name(repo_full_name: str) -> str:
     return slug or "repo"
 
 
+def _format_merge_date(value: datetime | None) -> str:
+    if value is None:
+        return "Unknown"
+    return value.date().isoformat()
+
+
+def _latest_merge_date(group: RepositoryContributions) -> str:
+    merged_at_values = [
+        contribution.merged_at
+        for contribution in group.contributions
+        if contribution.merged_at is not None
+    ]
+    return _format_merge_date(max(merged_at_values, default=None))
+
+
+def _extract_repo_names(readme_text: str) -> set[str]:
+    return {match.group(1).strip() for match in REPO_LINK_PATTERN.finditer(readme_text)}
+
+
+def wrap_marker_block(block_text: str) -> str:
+    return f"{START_MARKER}\n{block_text.strip()}\n{END_MARKER}"
+
+
 def render_readme_block(groups: list[RepositoryContributions], *, days: int) -> str:
     lines = [
         "## Recent Open Source Contributions",
@@ -50,6 +79,7 @@ def render_readme_block(groups: list[RepositoryContributions], *, days: int) -> 
             "<table>",
             "  <tr>",
             "    <th>Repository</th>",
+            "    <th>Latest Merge</th>",
             "    <th>Contribution Card</th>",
             "  </tr>",
         ]
@@ -63,6 +93,7 @@ def render_readme_block(groups: list[RepositoryContributions], *, days: int) -> 
                 (
                     f'    <td><a href="{group.repo_url}">{_escape_link_text(group.repo_full_name)}</a></td>'
                 ),
+                f"    <td>{_latest_merge_date(group)}</td>",
                 '    <td align="center">',
                 (
                     f'      <img src="./assets/{file_name}" '
@@ -93,13 +124,36 @@ def replace_marker_block(readme_text: str, block_text: str) -> str:
     existing = readme_text[start_index:end_index].strip()
     candidate = block_text.strip()
 
-    if not existing:
-        merged = candidate
-    elif candidate in existing:
-        merged = existing
-    else:
-        merged = f"{existing}\n\n{candidate}"
+    if existing == candidate:
+        return readme_text
+
+    merged = candidate
 
     before = readme_text[:start_index]
     after = readme_text[end_index:]
     return f"{before}\n{merged}\n{after}"
+
+
+def render_full_readme(
+    readme_text: str,
+    groups: list[RepositoryContributions],
+    *,
+    days: int,
+) -> str:
+    block_text = render_readme_block(groups, days=days)
+    if START_MARKER in readme_text or END_MARKER in readme_text:
+        return replace_marker_block(readme_text, block_text)
+
+    existing_repos = _extract_repo_names(readme_text)
+    groups_to_append = [
+        group for group in groups if group.repo_full_name not in existing_repos
+    ]
+    if not groups_to_append:
+        return readme_text
+
+    wrapped_block = wrap_marker_block(render_readme_block(groups_to_append, days=days))
+    if wrapped_block in readme_text:
+        return readme_text
+
+    separator = "\n" if readme_text.endswith("\n") else "\n\n"
+    return f"{readme_text}{separator}{wrapped_block}\n"
