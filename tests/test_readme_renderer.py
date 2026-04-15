@@ -92,12 +92,12 @@ def test_render_readme_block_includes_empty_state_when_no_groups() -> None:
     assert "No merged upstream contributions in the selected time window." in block
 
 
-def test_replace_marker_block_rewrites_only_marker_content() -> None:
+def test_replace_marker_block_appends_new_content_without_replacing_existing() -> None:
     original = "before\n<!-- contributions:start -->\nold\n<!-- contributions:end -->\nafter\n"
     updated = replace_marker_block(original, "new block")
     assert (
         updated
-        == "before\n<!-- contributions:start -->\nnew block\n<!-- contributions:end -->\nafter\n"
+        == "before\n<!-- contributions:start -->\nold\n\nnew block\n<!-- contributions:end -->\nafter\n"
     )
 
 
@@ -105,6 +105,12 @@ def test_replace_marker_block_rejects_malformed_marker_ordering() -> None:
     malformed = "before\n<!-- contributions:end -->\nold\n<!-- contributions:start -->\nafter\n"
     with pytest.raises(ReadmeMarkerError):
         replace_marker_block(malformed, "new")
+
+
+def test_replace_marker_block_skips_exact_duplicate_block() -> None:
+    original = "before\n<!-- contributions:start -->\nold\n<!-- contributions:end -->\nafter\n"
+    updated = replace_marker_block(original, "old")
+    assert updated == original
 
 
 def test_replace_marker_block_requires_both_markers() -> None:

@@ -90,6 +90,16 @@ def replace_marker_block(readme_text: str, block_text: str) -> str:
     start_index = start_marker_index + len(START_MARKER)
     end_index = end_marker_index
 
+    existing = readme_text[start_index:end_index].strip()
+    candidate = block_text.strip()
+
+    if not existing:
+        merged = candidate
+    elif candidate in existing:
+        merged = existing
+    else:
+        merged = f"{existing}\n\n{candidate}"
+
     before = readme_text[:start_index]
     after = readme_text[end_index:]
-    return f"{before}\n{block_text}\n{after}"
+    return f"{before}\n{merged}\n{after}"

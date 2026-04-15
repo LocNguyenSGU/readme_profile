@@ -27,24 +27,5 @@ python -m readme_updater.cli update --days 3 --dry-run
 <!-- contributions:start -->
 ## Recent Open Source Contributions
 
-### SVG Cards By Repository
-
-<table>
-  <tr>
-    <th>Repository</th>
-    <th>Contribution Card</th>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/HKUDS/DeepTutor">HKUDS/DeepTutor</a></td>
-    <td align="center">
-      <img src="./assets/contributions-hkuds-deeptutor.svg" alt="HKUDS/DeepTutor contribution card" width="420" />
-    </td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/chatgptprojects/clear-code">chatgptprojects/clear-code</a></td>
-    <td align="center">
-      <img src="./assets/contributions-chatgptprojects-clear-code.svg" alt="chatgptprojects/clear-code contribution card" width="420" />
-    </td>
-  </tr>
-</table>
+<img src="./assets/contributions.svg" alt="Recent open source contributions" width="100%" />
 <!-- contributions:end -->
